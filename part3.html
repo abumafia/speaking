@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Test - Interactive Design</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #0f0f0f;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      color: #fff;
+    }
+
+    .container {
+      text-align: center;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+      width: 90%;
+      max-width: 500px;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
+      color: #00ffcc;
+      text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 30px #00ffcc;
+    }
+
+    .audio-player,
+    .microphone {
+      margin: 30px 0;
+    }
+
+    .btn {
+      background-color: #00ffcc;
+      padding: 20px 40px;
+      border: none;
+      border-radius: 50px;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 0 15px #00ffcc, 0 0 30px #00ffcc;
+      transition: 0.3s;
+      color: #111;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .btn:hover {
+      background-color: #ff0080;
+      box-shadow: 0 0 25px #ff0080, 0 0 35px #ff0080;
+    }
+
+    .audio-player button,
+    .microphone button {
+      width: 100%;
+      padding: 15px 0;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #ffffff;
+    }
+
+    #transcription {
+      font-size: 20px;
+      color: #f4f4f4;
+      margin-top: 20px;
+      font-weight: 600;
+    }
+
+    .floating {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      color: #00ffcc;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .microphone-icon,
+    .audio-icon {
+      font-size: 40px;
+      color: #00ffcc;
+      margin: 20px;
+      animation: glowing 1.5s infinite alternate;
+    }
+
+    @keyframes glowing {
+      from {
+        text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 30px #00ffcc;
+      }
+      to {
+        text-shadow: 0 0 20px #ff0080, 0 0 30px #ff0080, 0 0 40px #ff0080;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Audio Test</h1>
+
+    <div id="questions">
+      <p id="question">Savolni kuting...</p>
+    </div>
+
+    <div class="audio-player">
+      <button id="playAudio" class="btn">
+        <span class="audio-icon">🎵</span> Play Audio
+      </button>
+      <audio id="audio" src="https://www.dropbox.com/scl/fi/9i307dyf25gva87bybltk/Test-1.mp3?rlkey=n6mw6ho7s39mie0ffx6x9kugq&st=vmr0jfmp&raw=1"></audio>
+    </div>
+
+    <div class="microphone">
+      <button id="startRecording" class="btn">
+        <span class="microphone-icon" id="mic-icon">🎙️</span> Start Recording
+      </button>
+      <p id="status">Waiting for your response...</p>
+    </div>
+
+    <div id="transcription" class="floating"></div>
+
+    <div class="response">
+      <button id="submit" class="btn" disabled>Submit Response</button>
+    </div>
+
+    <div id="score"></div>
+    <div class="floating" id="timer">Time Left: 120</div>
+  </div>
+  <footer>
+    <p>&copy; 2025 Speaking Test. HALLAYM LLC. | <a href="contact.html">Contact</a> | <a href="social.html">Social</a></p>
+</footer>
+  <script>
+    const playButton = document.getElementById('playAudio');
+    const audio = document.getElementById('audio');
+    const startRecordingButton = document.getElementById('startRecording');
+    const status = document.getElementById('status');
+    const submitButton = document.getElementById('submit');
+    const transcriptionDiv = document.getElementById('transcription');
+    const micIcon = document.getElementById('mic-icon');
+    const scoreDiv = document.getElementById('score');
+    const timerDiv = document.getElementById('timer');
+    let recognition;
+    let isRecording = false;
+    let timeLeft = 120;
+    let timer;
+    let timerStarted = false;
+    let submitCount = 0;
+    const questions = [
+      'Savol 1: Sizning sevimli mashg\'ulotingiz nima?',
+      'Savol 2: Hayotingizda eng yaxshi esda qolgan voqea nima?',
+      'Savol 3: Kelajakdagi orzularingiz haqida gapirib bering?',
+      'Savol 4: Eng sevimli kitobingiz qanday?',
+      'Savol 5: Sizni kim ilhomlantiradi?',
+      'Savol 6: O\'zingizni qanday ifodalayapsiz?',
+      'Savol 7: Tabiatni qanday ko\'rasiz?',
+      'Savol 8: Hayotingizdagi eng katta muvaffaqiyat nima?',
+      'Savol 9: Orzularingizni amalga oshirish uchun qanday qadamlar qo\'ygan bo\'lar edingiz?',
+      'Savol 10: Sevimli taomingiz nima?'
+    ];
+
+    let currentQuestionIndex = 0;
+
+    if ('webkitSpeechRecognition' in window) {
+      recognition = new webkitSpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = true;
+      recognition.continuous = true;
+
+      recognition.onstart = () => {
+        status.innerHTML = 'Listening...';
+      };
+
+      recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        transcriptionDiv.innerHTML = transcript;
+        submitButton.disabled = false;
+      };
+
+      recognition.onerror = () => {
+        status.innerHTML = 'Sorry, there was an error.';
+      };
+
+      recognition.onend = () => {
+        status.innerHTML = 'Recording ended.';
+        micIcon.innerHTML = '🎙️';
+      };
+
+      startRecordingButton.addEventListener('click', () => {
+        if (!isRecording) {
+          status.innerHTML = 'Please wait for the microphone to start...';
+          micIcon.innerHTML = '⏳';
+
+          setTimeout(() => {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+              navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(function(stream) {
+                  recognition.start();
+                  status.innerHTML = 'Recording...';
+                  micIcon.innerHTML = '🛑';
+                  isRecording = true;
+                  startTimer();  // Start 120-second timer after the mic starts
+                })
+                .catch(function(error) {
+                  status.innerHTML = 'Microphone access denied.';
+                  micIcon.innerHTML = '🎙️';
+                });
+            } else {
+              status.innerHTML = 'Microphone not supported.';
+            }
+          }, 500);
+        } else {
+          recognition.stop();
+          isRecording = false;
+        }
+      });
+
+      submitButton.addEventListener('click', () => {
+        const score = Math.floor(Math.random() * 26); // Random score between 0-25
+        alert('Response submitted! Your score: ' + score);
+        scoreDiv.innerHTML = 'Your score: ' + score;
+
+        submitCount++;
+        setTimeout(() => {
+          if (submitCount >= 3) {
+            window.location.href = "index.html";  // Redirect after third submit
+          } else {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+              displayQuestion(currentQuestionIndex);
+              resetForNextQuestion();
+              startRecordingButton.disabled = false; // Enable mic button for next question
+            }
+          }
+        }, 2000);
+      });
+
+      function displayQuestion(index) {
+        document.getElementById('question').innerText = questions[index];
+      }
+
+      function startTimer() {
+        if (timerStarted) return;
+        timerStarted = true;
+        timer = setInterval(() => {
+          if (timeLeft > 0) {
+            timeLeft--;
+            timerDiv.innerHTML = 'Time Left: ' + timeLeft;
+          } else {
+            clearInterval(timer);
+            timerDiv.innerHTML = 'Time\'s up!';
+            recognition.stop(); // Stop the microphone when time is up
+            status.innerHTML = 'Recording ended.';
+          }
+        }, 1000);
+      }
+
+      function resetForNextQuestion() {
+        transcriptionDiv.innerHTML = '';
+        scoreDiv.innerHTML = '';
+        submitButton.disabled = true;
+        status.innerHTML = 'Waiting for your response...';
+        timerDiv.innerHTML = 'Time Left: 120';
+        timeLeft = 120;
+        timerStarted = false;
+      }
+    } else {
+      status.innerHTML = 'Speech recognition is not supported by this browser.';
+    }
+
+    // Display first question
+    displayQuestion(currentQuestionIndex);
+  </script>
+</body>
+</html>
