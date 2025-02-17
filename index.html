@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS Speaking - Start</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #1a1a1a;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #0a2a2a, #1c4f4f);
+            overflow: hidden;
+        }
+        .container {
+            text-align: center;
+            padding: 40px 60px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: floating 3s ease-in-out infinite;
+        }
+        h1 {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #FF4081;
+            text-shadow: 0 0 15px #FF4081, 0 0 20px #FF4081;
+            animation: neon 1.5s ease-in-out infinite alternate;
+        }
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            color: #b2dfdb;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .button {
+            background-color: #FF4081;
+            padding: 20px 40px;
+            font-size: 1.2em;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            width: 200px;
+            box-shadow: 0 0 15px rgba(255, 64, 129, 0.7);
+        }
+        .button:hover {
+            background-color: #F50057;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 25px rgba(255, 64, 129, 0.9);
+        }
+        .button:active {
+            transform: translateY(0);
+            background-color: #C51162;
+        }
+        footer {
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9em;
+            color: #b2dfdb;
+        }
+        @keyframes floating {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+        @keyframes neon {
+            0% {
+                text-shadow: 0 0 10px #FF4081, 0 0 20px #FF4081;
+            }
+            100% {
+                text-shadow: 0 0 20px #FF4081, 0 0 30px #FF4081;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>IELTS Speaking Test</h1>
+        <p>IELTS Speaking testining boshlanishi uchun quyidagi sahifalarga yo'naltirilgan tugmalarni bosing:</p>
+        <div class="buttons">
+            <a href="oqituvchilar.html">
+                <button class="button">O'qituvchilar</button>
+            </a>
+            <a href="contact.html">
+                <button class="button">Bog'lanish</button>
+            </a>
+            <a href="part1.html">
+                <button class="button">Start (Part 1)</button>
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 IELTS Speaking Test. Barcha huquqlar himoyalangan.</p>
+    </footer>
+
+</body>
+</html>
